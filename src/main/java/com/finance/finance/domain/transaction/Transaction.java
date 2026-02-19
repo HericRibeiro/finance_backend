@@ -6,8 +6,12 @@ import java.time.LocalDate;
 import com.finance.finance.domain.category.Category;
 import com.finance.finance.domain.user.User;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class Transaction {
     
     @Id

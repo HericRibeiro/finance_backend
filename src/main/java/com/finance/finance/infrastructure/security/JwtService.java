@@ -2,81 +2,61 @@ package com.finance.finance.infrastructure.security;
 
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 
 import com.finance.finance.infrastructure.config.JwtProperties;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final JwtProperties jwtProperties;
 
-    private Key getSecretKey() {
-        return Keys.hmacShaKeyFor(jwtProperties.getJwt().getSecret().getBytes());
+    private Key getKey() {
+        return Keys.hmacShaKeyFor(
+            jwtProperties.getJwt().getSecret().getBytes()
+        );
     }
 
-    public String generateToken(String email) {
+    public String generateToken(Long id, String email) {
         return Jwts.builder()
             .setSubject(email)
+            .claim("id", id)
             .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getJwt().getExpiration()))
-            .signWith(getSecretKey(), SignatureAlgorithm.HS256)
+            .setExpiration(new Date(
+                System.currentTimeMillis() + jwtProperties.getJwt().getExpiration()
+            ))
+            .signWith(getKey(), SignatureAlgorithm.HS256)
             .compact();
     }
 
-
-    // Criar um arquivo DTO para o subject do token, para evitar passar muitos parâmetros
-    // Pegar role do banco, assim muda imediatamente quando o usuário for promovido ou rebaixado, sem precisar gerar um novo token
-    // Outra vantagem é que se o token vazar, o invasor não tem acesso a informações sensíveis do usuário, como senha ou outros dados pessoais
-    public String generateTokenWithUser(TokenSubject subject) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", subject.getId());
-        claims.put("email", subject.getEmail());
-        claims.put("role", subject.getRole().toString());
-
-        return Jwts.builder()
-            .setClaims(claims)
-            .setSubject(subject.getEmail())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getJwt().getExpiration()))
-            .signWith(getSecretKey(), SignatureAlgorithm.HS256)
-            .compact();
+    public String extractEmail(String token) {
+        return getClaims(token).getSubject();
     }
-
-        public String extractMail(String token) {
-        return extractClaims(token).getSubject();
-    }
-
-    public String extractRole(String token) {
-        return extractClaims(token).get("role", String.class);
-    }
-
+    
     public Long extractId(String token) {
-        return extractClaims(token).get("id", Long.class);
+        return getClaims(token).get("id", Long.class);
+    }
+    
+    public boolean isValid(String token, String email) {
+        String emailOfToken = extractEmail(token);
+        return (emailOfToken.equals(email) && !isExpired(token));
     }
 
-    public boolean validToken(String token, String email) {
-        String emailOfToken = extractMail(token);
-        return (emailOfToken.equals(email) && !tokenExpiration(token));
+    public boolean isExpired(String token) {
+        return getClaims(token).getExpiration().before(new Date());
     }
 
-    public boolean tokenExpiration(String token) {
-        return extractClaims(token).getExpiration().before(new Date());
-    }
-
-    public Claims extractClaims(String token) {
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
-            .setSigningKey(getSecretKey())
+            .setSigningKey(getKey())
             .build()
             .parseClaimsJws(token)
             .getBody();
