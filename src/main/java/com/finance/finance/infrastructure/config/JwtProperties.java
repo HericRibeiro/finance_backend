@@ -1,39 +1,39 @@
 package com.finance.finance.infrastructure.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@ConfigurationProperties(prefix = "app")
-public class JwtProperties {
+@Configuration 
+@ConfigurationProperties(prefix = "app") 
+public class JwtProperties { 
+    private Jwt jwt; 
     
-    private Jwt jwt;
-
-    public static class Jwt {
-        private String secret;
-        private long expiration;
-
-        public String getSecret() {
-            return secret;
-        }
+    public static class Jwt { 
+        
+        private String secret; 
+        private long expiration; 
+        
+        public String getSecret() { 
+            return secret; 
+        } 
 
         public void setSecret(String secret) {
-            this.secret = secret;
+             this.secret = secret; 
         }
-
+        
         public long getExpiration() {
-            return expiration;
-        }
-
+             return expiration; 
+        } 
         public void setExpiration(long expiration) {
-            this.expiration = expiration;
-        }
-    }
-
+             this.expiration = expiration; 
+        } 
+    } 
+    
     public Jwt getJwt() {
-        return jwt;
-    }
-
+        return jwt; 
+    } 
+    
     public void setJwt(Jwt jwt) {
-        this.jwt = jwt;
-    }
-
+        this.jwt = jwt; 
+    } 
 }
