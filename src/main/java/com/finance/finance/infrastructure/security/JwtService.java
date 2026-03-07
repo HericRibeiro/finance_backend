@@ -2,6 +2,7 @@ package com.finance.finance.infrastructure.security;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class JwtService {
         );
     }
 
-    public String generateToken(Long id, String email) {
+    public String generateToken(UUID id, String email) {
         return Jwts.builder()
             .setSubject(email)
             .claim("id", id)

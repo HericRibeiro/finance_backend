@@ -27,14 +27,6 @@ public class GlobalExeceptionHandler {
         return buildResponse(ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
-    // @ExceptionHandler(Exception.class)
-    // public ResponseEntity<ApiErrorResponse> handleGeneric(Exception ex) {
-
-    //     ex.printStackTrace();
-
-    //     return buildResponse("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
-    // }  
-    
     private ResponseEntity<ApiErrorResponse> buildResponse(String message, HttpStatus status) {
         ApiErrorResponse response = new ApiErrorResponse(
             false,
